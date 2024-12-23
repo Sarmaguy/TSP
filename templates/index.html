@@ -4,7 +4,7 @@
     <title>TSP Map</title>
     <script src="{{api_key}}"></script>
     <script>
-        let map, markers = [], coordinates = [], polylines = [];
+        let map, markers = [], coordinates = [], polylines = [], markerDetails = [];
 
         // Initialize the map
         function initMap() {
@@ -51,7 +51,67 @@
                 zIndex: 1000,  // Ensure the label appears above the marker
             });
             markers.push(label);
+            geocodeLocation(location, markerCount);
         }
+        // Store marker details (number and name) for display
+        function geocodeLocation(location, markerCount) {
+            let geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: location }, (results, status) => {
+                let locationName = "Unknown Location";
+                if (status === "OK" && results[0]) {
+                    locationName = results[0].formatted_address;
+
+                }
+
+                // Store the marker details (number and name)
+                markerDetails.push({
+                    number: markerCount,
+                    name: locationName
+                });
+
+                // Update the marker information below the map
+                updateMarkerInfo();
+            });
+        }
+
+        // Function to update marker information below the map
+        function updateMarkerInfo() {
+            const infoContainer = document.getElementById("markerInfo");
+            infoContainer.innerHTML = "<h3>Marker Information</h3>";
+
+            // Create a table to display marker details
+            const table = document.createElement("table");
+            table.style.borderCollapse = "collapse";
+            table.style.width = "100%";
+
+            // Table headers
+            const headerRow = document.createElement("tr");
+            const headerNumber = document.createElement("th");
+            headerNumber.textContent = "Marker #";
+            const headerName = document.createElement("th");
+            headerName.textContent = "Location Name";
+            headerRow.appendChild(headerNumber);
+            headerRow.appendChild(headerName);
+            table.appendChild(headerRow);
+
+            // Generate table rows for each marker
+            markerDetails.forEach(marker => {
+                const row = document.createElement("tr");
+
+                const cellNumber = document.createElement("td");
+                cellNumber.textContent = marker.number;
+
+                const cellName = document.createElement("td");
+                cellName.textContent = marker.name;
+
+                row.appendChild(cellNumber);
+                row.appendChild(cellName);
+                table.appendChild(row);
+            });
+
+            infoContainer.appendChild(table);
+        }
+
 
 
         // Get distances between all pairs of locations
@@ -73,7 +133,7 @@
                         );
 
                         // Print distance matrix to HTML
-                        printDistanceMatrix(distanceMatrix);
+                        //printDistanceMatrix(distanceMatrix);
 
                         // Send distances to backend for TSP
                         fetch('/solve-tsp', {
@@ -93,30 +153,30 @@
             );
         }
 
-        // Function to print distance matrix below map
-        function printDistanceMatrix(matrix) {
-            const matrixContainer = document.getElementById("distanceMatrix");
-            matrixContainer.innerHTML = "<h3>Distance Matrix</h3>";
+        // // Function to print distance matrix below map
+        // function printDistanceMatrix(matrix) {
+        //     const matrixContainer = document.getElementById("distanceMatrix");
+        //     matrixContainer.innerHTML = "<h3>Distance Matrix</h3>";
 
-            // Create a table
-            const table = document.createElement("table");
-            table.style.borderCollapse = "collapse";
+        //     // Create a table
+        //     const table = document.createElement("table");
+        //     table.style.borderCollapse = "collapse";
 
-            // Generate table rows
-            for (let i = 0; i < matrix.length; i++) {
-                const row = document.createElement("tr");
-                for (let j = 0; j < matrix[i].length; j++) {
-                    const cell = document.createElement("td");
-                    cell.textContent = matrix[i][j];
-                    cell.style.border = "1px solid #000";
-                    cell.style.padding = "5px";
-                    row.appendChild(cell);
-                }
-                table.appendChild(row);
-            }
+        //     // Generate table rows
+        //     for (let i = 0; i < matrix.length; i++) {
+        //         const row = document.createElement("tr");
+        //         for (let j = 0; j < matrix[i].length; j++) {
+        //             const cell = document.createElement("td");
+        //             cell.textContent = matrix[i][j];
+        //             cell.style.border = "1px solid #000";
+        //             cell.style.padding = "5px";
+        //             row.appendChild(cell);
+        //         }
+        //         table.appendChild(row);
+        //     }
 
-            matrixContainer.appendChild(table);
-        }
+        //     matrixContainer.appendChild(table);
+        // }
 
         // Function to display the optimized route
         function displayRoute(route) {
@@ -176,8 +236,8 @@
             displaySegment(0);
         }
 
-        // Function to reset map
-        function resetMap() {
+         // Function to reset map
+         function resetMap() {
             // Clear markers from the map
             markers.forEach(marker => marker.setMap(null));
             markers = [];
@@ -186,11 +246,13 @@
             polylines.forEach(polyline => polyline.setMap(null));
             polylines = [];
 
-            // Clear coordinates
+            // Clear coordinates and marker details
             coordinates = [];
+            markerDetails = [];
 
-            // Clear distance matrix display
+            // Clear distance matrix and marker information displays
             document.getElementById("distanceMatrix").innerHTML = "";
+            document.getElementById("markerInfo").innerHTML = "";
         }
     </script>
 </head>
@@ -200,5 +262,6 @@
     <button onclick="calculateDistances()">Solve TSP</button>
     <button onclick="resetMap()">Reset</button>
     <div id="distanceMatrix"></div>
+    <div id="markerInfo"></div>
 </body>
 </html>
