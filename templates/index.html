@@ -19,6 +19,8 @@
             });
         }
 
+        let markerCount = 0;  // Counter to keep track of the order of markers
+
         // Add marker on map and store coordinates
         function addMarker(location) {
             let marker = new google.maps.Marker({
@@ -27,7 +29,30 @@
             });
             markers.push(marker);
             coordinates.push({ lat: location.lat(), lng: location.lng() });
+
+            // Increment marker count and display the number on the marker
+            markerCount++;
+
+            // Create an info window or label to display the number on the marker
+            let infoWindow = new google.maps.InfoWindow({
+                content: `<div style="font-size: 16px; font-weight: bold;">${markerCount}</div>`
+            });
+
+            // Open info window upon marker click (optional)
+            marker.addListener("click", () => {
+                infoWindow.open(map, marker);
+            });
+
+            // Optionally, position the number above the marker
+            const label = new google.maps.Marker({
+                position: location,
+                map: map,
+                label: markerCount.toString(),
+                zIndex: 1000,  // Ensure the label appears above the marker
+            });
+            markers.push(label);
         }
+
 
         // Get distances between all pairs of locations
         function calculateDistances() {
