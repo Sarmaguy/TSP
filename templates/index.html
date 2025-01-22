@@ -182,6 +182,17 @@
             const tspRoute = route.map(idx => coordinates[idx]);
             const directionsService = new google.maps.DirectionsService();
 
+            // Prikaz redoslijeda obilaska ispod karte
+            const routeOrderContainer = document.getElementById("routeOrder");
+            routeOrderContainer.innerHTML = "<h3>Route Order</h3>";
+
+            let routeList = "<ol>";
+            route.forEach((idx, i) => {
+                routeList += `<li>Marker #${idx + 1}: ${markerDetails[idx].name}</li>`;
+            });
+            routeList += "</ol>";
+            routeOrderContainer.innerHTML += routeList;
+
             // Include the last-to-first segment to complete the loop
             const routeSegments = tspRoute.map((location, index) => {
                 if (index < tspRoute.length - 1) {
@@ -235,8 +246,9 @@
             displaySegment(0);
         }
 
+
          // Function to reset map
-         function resetMap() {
+         function resetMap(markerCount) {
             // Clear markers from the map
             markers.forEach(marker => marker.setMap(null));
             markers = [];
@@ -249,12 +261,9 @@
             coordinates = [];
             markerDetails = [];
 
-            // Clear distance matrix and marker information displays
-            document.getElementById("distanceMatrix").innerHTML = "";
-            document.getElementById("markerInfo").innerHTML = "";
-
             markerCount = 0; // Reset marker count
         }
+
     </script>
         <title>Traveling Salesman Problem Map</title>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -274,6 +283,32 @@
                 padding: 15px 20px;
                 text-align: center;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            #routeOrder {
+                margin: 20px auto;
+                max-width: 1000px;
+                background: white;
+                border-radius: 10px;
+                padding: 20px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            #routeOrder h3 {
+                margin-top: 0;
+                font-size: 20px;
+                color: #007bff;
+            }
+
+            #routeOrder ol {
+                padding-left: 20px;
+                margin: 10px 0;
+            }
+
+            #routeOrder li {
+                font-size: 16px;
+                padding: 5px 0;
+                color: #333;
             }
     
             header h1 {
@@ -382,6 +417,12 @@
     <div class="buttons">
         <button onclick="calculateDistances()">Solve TSP</button>
         <button onclick="resetMap()">Reset</button>
+    </div>
+
+        <!-- Route Order Section -->
+    <div id="routeOrder">
+        <h3>Route Order</h3>
+        <!-- Route order will be dynamically updated -->
     </div>
 
     <!-- Marker Info Section -->
